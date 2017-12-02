@@ -20,11 +20,17 @@ public class DataDownloader extends AsyncTask<String, Integer, byte[]> {
     private ProgressDialog dialog;
     private String file;
     private Activity activity;
+    private DownloadListener listener;
 
-    public DataDownloader(Activity activity, String filename) {
+    public interface DownloadListener {
+        void onDownloadCompleted();
+    }
+
+    public DataDownloader(Activity activity, String filename, DownloadListener listener) {
         this.dialog = new ProgressDialog(activity);
         this.file = filename;
         this.activity = activity;
+        this.listener = listener;
     }
 
     @Override
@@ -72,6 +78,7 @@ public class DataDownloader extends AsyncTask<String, Integer, byte[]> {
             outputStream.write(result);
             outputStream.flush();
             outputStream.close();
+            listener.onDownloadCompleted();
         } catch (IOException e) {
             e.printStackTrace();
         }

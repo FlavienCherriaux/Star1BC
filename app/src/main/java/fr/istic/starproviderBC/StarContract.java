@@ -60,6 +60,7 @@ public interface StarContract {
         String CONTENT_PATH = "stoptime";
         Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, CONTENT_PATH);
         // select stop_time.*, trip.*, calendar.*
+
         String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.fr.istic.starproviderBC.stoptime";
         String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.fr.istic.starproviderBC.stoptime";
 
