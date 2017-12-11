@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.io.File;
+
 import fr.istic.starproviderBC.StarContract.*;
 
 /**
@@ -29,7 +31,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Table busroute
         db.execSQL("CREATE TABLE IF NOT EXISTS " + BusRoutes.CONTENT_PATH + " (" +
-                BusRoutes.BusRouteColumns._ID + " INTEGER NOT NULL," +
+                BusRoutes.BusRouteColumns._ID + " INTEGER NOT NULL, " +
                 BusRoutes.BusRouteColumns.SHORT_NAME + " TEXT, " +
                 BusRoutes.BusRouteColumns.LONG_NAME + " TEXT, " +
                 BusRoutes.BusRouteColumns.DESCRIPTION + " TEXT, " +
@@ -41,7 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Table trip
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Trips.CONTENT_PATH + " (" +
-                Trips.TripColumns._ID + " INTEGER NOT NULL," +
+                Trips.TripColumns._ID + " INTEGER NOT NULL, " +
                 Trips.TripColumns.ROUTE_ID + " INTEGER, " +
                 Trips.TripColumns.SERVICE_ID + " INTEGER, " +
                 Trips.TripColumns.HEADSIGN + " TEXT, " +
@@ -53,7 +55,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Table stop
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Stops.CONTENT_PATH + " (" +
-                Stops.StopColumns._ID + " INTEGER NOT NULL," +
+                Stops.StopColumns._ID + " INTEGER NOT NULL, " +
                 Stops.StopColumns.NAME + " TEXT, " +
                 Stops.StopColumns.DESCRIPTION + " TEXT, " +
                 Stops.StopColumns.LATITUDE + " REAL, " +
@@ -75,7 +77,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Table calendar
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Calendar.CONTENT_PATH + " (" +
-                Calendar.CalendarColumns._ID + " INTEGER NOT NULL," +
+                Calendar.CalendarColumns._ID + " INTEGER NOT NULL, " +
                 Calendar.CalendarColumns.MONDAY + " INTEGER, " +
                 Calendar.CalendarColumns.TUESDAY + " INTEGER, " +
                 Calendar.CalendarColumns.WEDNESDAY + " INTEGER, " +
@@ -92,8 +94,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.w(DatabaseHelper.class.getName(), "Upgrading database from version " + oldVersion + " to " + newVersion + ", which will destroy all old data");
-        // db.execSQL("DROP TABLE IF EXISTS " + TABLE_COUNTRY);
-        // db.execSQL("DROP TABLE IF EXISTS " + TABLE_CITY);
+        db.execSQL("DROP TABLE " + BusRoutes.CONTENT_PATH);
+        db.execSQL("DROP TABLE " + Trips.CONTENT_PATH);
+        db.execSQL("DROP TABLE " + Stops.CONTENT_PATH);
+        db.execSQL("DROP TABLE " + StopTimes.CONTENT_PATH);
+        db.execSQL("DROP TABLE " + Calendar.CONTENT_PATH);
         onCreate(db);
     }
 
