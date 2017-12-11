@@ -72,7 +72,7 @@ public class Star1BC extends AppCompatActivity {
                             System.out.println("delete : " + (aze.delete() ? "ok" : "bite"));
 
                             // Si le fichier à télécharger n'existe pas déjà, c-à-d si les données ne sont pas à jour ...
-                            if (/*!new File(Star1BC.this.getFilesDir().getAbsolutePath() + File.separator + destFilename).exists()*/aze.exists()) {
+                            if (/*!new File(Star1BC.this.getFilesDir().getAbsolutePath() + File.separator + destFilename).exists()*/!aze.exists()) {
                                 // ... on crée une notification
                                 NotificationManager notificationManager = (NotificationManager) Star1BC.this.getSystemService(Context.NOTIFICATION_SERVICE);
                                 Intent resultIntent = new Intent(Star1BC.this, Star1BC.class);

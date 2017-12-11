@@ -31,11 +31,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Table busroute
         db.execSQL("CREATE TABLE IF NOT EXISTS " + BusRoutes.CONTENT_PATH + " (" +
-                BusRoutes.BusRouteColumns._ID + " INTEGER NOT NULL, " +
+                BusRoutes.BusRouteColumns._ID + " TEXT NOT NULL, " +
                 BusRoutes.BusRouteColumns.SHORT_NAME + " TEXT, " +
                 BusRoutes.BusRouteColumns.LONG_NAME + " TEXT, " +
                 BusRoutes.BusRouteColumns.DESCRIPTION + " TEXT, " +
-                BusRoutes.BusRouteColumns.TYPE + " INTEGER, " +
+                BusRoutes.BusRouteColumns.TYPE + " TEXT, " +
                 BusRoutes.BusRouteColumns.COLOR + " TEXT, " +
                 BusRoutes.BusRouteColumns.TEXT_COLOR + " TEXT, " +
                 "PRIMARY KEY(" + BusRoutes.BusRouteColumns._ID + ")" +
@@ -43,48 +43,48 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Table trip
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Trips.CONTENT_PATH + " (" +
-                Trips.TripColumns._ID + " INTEGER NOT NULL, " +
-                Trips.TripColumns.ROUTE_ID + " INTEGER, " +
-                Trips.TripColumns.SERVICE_ID + " INTEGER, " +
+                Trips.TripColumns._ID + " TEXT NOT NULL, " +
+                Trips.TripColumns.ROUTE_ID + " TEXT, " +
+                Trips.TripColumns.SERVICE_ID + " TEXT, " +
                 Trips.TripColumns.HEADSIGN + " TEXT, " +
-                Trips.TripColumns.DIRECTION_ID + " INTEGER, " +
+                Trips.TripColumns.DIRECTION_ID + " TEXT, " +
                 Trips.TripColumns.BLOCK_ID + " TEXT, " +
-                Trips.TripColumns.WHEELCHAIR_ACCESSIBLE + " INTEGER, " +
+                Trips.TripColumns.WHEELCHAIR_ACCESSIBLE + " TEXT, " +
                 "PRIMARY KEY(" + Trips.TripColumns._ID + ")" +
                 ")");
 
         // Table stop
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Stops.CONTENT_PATH + " (" +
-                Stops.StopColumns._ID + " INTEGER NOT NULL, " +
+                Stops.StopColumns._ID + " TEXT NOT NULL, " +
                 Stops.StopColumns.NAME + " TEXT, " +
                 Stops.StopColumns.DESCRIPTION + " TEXT, " +
                 Stops.StopColumns.LATITUDE + " REAL, " +
                 Stops.StopColumns.LONGITUDE + " REAL, " +
-                Stops.StopColumns.WHEELCHAIR_BOARDING + " INTEGER, " +
+                Stops.StopColumns.WHEELCHAIR_BOARDING + " TEXT, " +
                 "PRIMARY KEY(" + Stops.StopColumns._ID + ")" +
                 ")");
 
         // Table stoptime
         db.execSQL("CREATE TABLE IF NOT EXISTS " + StopTimes.CONTENT_PATH + " (" +
-                StopTimes.StopTimeColumns._ID + " INTEGER NOT NULL," +
-                StopTimes.StopTimeColumns.TRIP_ID + " INTEGER, " +
+                StopTimes.StopTimeColumns._ID + " TEXT NOT NULL," +
+                StopTimes.StopTimeColumns.TRIP_ID + " TEXT, " +
                 StopTimes.StopTimeColumns.ARRIVAL_TIME + " TEXT, " +
                 StopTimes.StopTimeColumns.DEPARTURE_TIME + " TEXT, " +
-                StopTimes.StopTimeColumns.STOP_ID + " INTEGER, " +
-                StopTimes.StopTimeColumns.STOP_SEQUENCE + " INTEGER, " +
+                StopTimes.StopTimeColumns.STOP_ID + " TEXT, " +
+                StopTimes.StopTimeColumns.STOP_SEQUENCE + " TEXT, " +
                 "PRIMARY KEY(" + StopTimes.StopTimeColumns._ID + ")" +
                 ")");
 
         // Table calendar
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Calendar.CONTENT_PATH + " (" +
-                Calendar.CalendarColumns._ID + " INTEGER NOT NULL, " +
-                Calendar.CalendarColumns.MONDAY + " INTEGER, " +
-                Calendar.CalendarColumns.TUESDAY + " INTEGER, " +
-                Calendar.CalendarColumns.WEDNESDAY + " INTEGER, " +
-                Calendar.CalendarColumns.THURSDAY + " INTEGER, " +
-                Calendar.CalendarColumns.FRIDAY + " INTEGER, " +
-                Calendar.CalendarColumns.SATURDAY + " INTEGER, " +
-                Calendar.CalendarColumns.SUNDAY + " INTEGER, " +
+                Calendar.CalendarColumns._ID + " TEXT NOT NULL, " +
+                Calendar.CalendarColumns.MONDAY + " TEXT, " +
+                Calendar.CalendarColumns.TUESDAY + " TEXT, " +
+                Calendar.CalendarColumns.WEDNESDAY + " TEXT, " +
+                Calendar.CalendarColumns.THURSDAY + " TEXT, " +
+                Calendar.CalendarColumns.FRIDAY + " TEXT, " +
+                Calendar.CalendarColumns.SATURDAY + " TEXT, " +
+                Calendar.CalendarColumns.SUNDAY + " TEXT, " +
                 Calendar.CalendarColumns.START_DATE + " TEXT, " +
                 Calendar.CalendarColumns.END_DATE + " TEXT, " +
                 "PRIMARY KEY(" + Calendar.CalendarColumns._ID + ")" +
