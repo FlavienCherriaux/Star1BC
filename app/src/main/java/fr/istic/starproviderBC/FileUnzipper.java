@@ -10,12 +10,12 @@ import java.util.zip.ZipInputStream;
  * Created by 17012154 on 21/11/17.
  */
 
-public class FileUnziper {
+public class FileUnzipper {
     /**
      * Décompresse le fichier fileToUnzip dans le dossier destFolder
-     * @param fileToUnzip
-     * @param destFolder
-     * @return the unzipped folder
+     * @param fileToUnzip le fichier à dézipper
+     * @param destFolder le dossier dans lequel dézipper le fichier
+     * @return le dossier dézippé
      */
     public static File unzip(File fileToUnzip, File destFolder) {
         byte[] buffer = new byte[1024];

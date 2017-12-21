@@ -1,15 +1,15 @@
 package fr.istic.starproviderBC;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import java.io.File;
-
-import fr.istic.starproviderBC.StarContract.*;
+import fr.istic.starproviderBC.StarContract.BusRoutes;
+import fr.istic.starproviderBC.StarContract.Calendar;
+import fr.istic.starproviderBC.StarContract.StopTimes;
+import fr.istic.starproviderBC.StarContract.Stops;
+import fr.istic.starproviderBC.StarContract.Trips;
 
 /**
  * Created by 17012154 on 14/11/17.
@@ -76,7 +76,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 ")");
 
         // Table calendar
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + Calendar.CONTENT_PATH + " (" +
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + Calendar.CONTENT_PAT + " (" +
                 Calendar.CalendarColumns._ID + " TEXT NOT NULL, " +
                 Calendar.CalendarColumns.MONDAY + " TEXT, " +
                 Calendar.CalendarColumns.TUESDAY + " TEXT, " +
@@ -89,6 +89,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 Calendar.CalendarColumns.END_DATE + " TEXT, " +
                 "PRIMARY KEY(" + Calendar.CalendarColumns._ID + ")" +
                 ")");
+
+        db.execSQL("CREATE TABLE IF NOT EXISTS versions (" +
+                "filename TEXT, " + // nom du fichier zip contenant les données
+                "validityStart TEXT, " + // date de début de validité du fichier
+                "validityEnd TEXT, " + // date de fin de validité du fichier
+                "dataInserted INTEGER, " + // 0 si les données n'ont pas été insérées dans la base, 1 sinon (booléen)
+                "PRIMARY KEY (filename)" +
+                ")");
     }
 
     @Override
@@ -98,31 +106,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE " + Trips.CONTENT_PATH);
         db.execSQL("DROP TABLE " + Stops.CONTENT_PATH);
         db.execSQL("DROP TABLE " + StopTimes.CONTENT_PATH);
-        db.execSQL("DROP TABLE " + Calendar.CONTENT_PATH);
+        db.execSQL("DROP TABLE " + Calendar.CONTENT_PAT);
         onCreate(db);
-    }
-
-    // Test insertion puis affichage de la table Country
-    public void test() {
-        /*ContentValues values = new ContentValues();
-
-        try {
-            values.put("_id", 1);
-            values.put("name", "France");
-            this.getWritableDatabase().insert(TABLE_COUNTRY, null, values);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        Cursor c = this.getReadableDatabase().query(TABLE_COUNTRY, new String[] {"name"}, null, null, null, null, null);
-
-        if (c != null) {
-            while (!c.isLast()) {
-                c.moveToNext();
-                System.out.println(c.getString(0));
-            }
-        }
-
-        this.getWritableDatabase().delete(TABLE_COUNTRY, null, null);*/
     }
 }

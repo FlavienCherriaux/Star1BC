@@ -10,7 +10,6 @@ import java.io.DataInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 
 /**
  * Created by 17012154 on 21/11/17.
@@ -61,11 +60,8 @@ public class DataDownloader extends AsyncTask<String, Integer, byte[]> {
 
         return new byte[0];
     }
-
     @Override
-    protected void onProgressUpdate(Integer... values) {
-        System.out.println(Arrays.toString(values));
-    }
+    protected void onProgressUpdate(Integer... values) {}
 
     @Override
     protected void onPostExecute(byte[] result) {

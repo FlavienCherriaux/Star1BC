@@ -16,6 +16,7 @@ public interface StarContract {
         String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.fr.istic.starproviderBC.busroute";
 
         interface BusRouteColumns extends BaseColumns {
+            String _ID = "route_id";
             String SHORT_NAME = "route_short_name";
             String LONG_NAME = "route_long_name";
             String DESCRIPTION = "route_desc";
@@ -32,6 +33,7 @@ public interface StarContract {
         String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.fr.istic.starproviderBC.trip";
 
         interface TripColumns extends BaseColumns {
+            String _ID = "trip_id";
             String ROUTE_ID = "route_id";
             String SERVICE_ID = "service_id";
             String HEADSIGN = "trip_headsign";
@@ -48,6 +50,7 @@ public interface StarContract {
         String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.fr.istic.starproviderBC.stop";
 
         interface StopColumns extends BaseColumns {
+            String _ID = "stop_id";
             String NAME = "stop_name";
             String DESCRIPTION = "stop_desc";
             String LATITUDE = "stop_lat";
@@ -80,6 +83,7 @@ public interface StarContract {
         String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.fr.istic.starproviderBC.calendar";
 
         interface CalendarColumns extends BaseColumns {
+            String _ID = "service_id";
             String MONDAY = "monday";
             String TUESDAY = "tuesday";
             String WEDNESDAY = "wednesday";
