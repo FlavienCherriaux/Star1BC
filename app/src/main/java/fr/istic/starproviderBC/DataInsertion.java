@@ -4,21 +4,31 @@ import android.app.Activity;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
+import android.view.View;
+import android.widget.HorizontalScrollView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+
+import com.example.a17012154.star1bc.R;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Scanner;
+
+import fr.istic.starproviderBC.StarContract.BusRoutes;
+import fr.istic.starproviderBC.StarContract.Calendar;
+import fr.istic.starproviderBC.StarContract.StopTimes;
+import fr.istic.starproviderBC.StarContract.Stops;
+import fr.istic.starproviderBC.StarContract.Trips;
 
 /**
  * fr.istic.starproviderBC
@@ -33,126 +43,110 @@ public class DataInsertion extends AsyncTask<File, Integer, Boolean> {
     public DataInsertion(Activity activity, SQLiteDatabase database) {
         this.activity = activity;
         this.database = database;
-        this.progressBar = new ProgressBar(activity);
+        this.progressBar = new ProgressBar(activity, null, android.R.attr.progressBarStyleHorizontal);
     }
 
     @Override
     protected void onPreExecute() {
+        progressBar.setMax(100);
+        progressBar.setVisibility(ProgressBar.VISIBLE);
     }
 
     @Override
     protected Boolean doInBackground(File... files) {
         // Liste des fichiers auxquels on associe le nom de la table correspondante dans la base de données
-        Map<String, Class> fileTableAssociations = new HashMap<String, Class>();
-        fileTableAssociations.put("routes.txt", StarContract.BusRoutes.class);
-        fileTableAssociations.put("trips.txt", StarContract.Trips.class);
-        fileTableAssociations.put("stops.txt", StarContract.Stops.class);
-        fileTableAssociations.put("stop_times.txt", StarContract.StopTimes.class);
-        fileTableAssociations.put("calendar.txt", StarContract.Calendar.class);
+        Map<String, String> fileTableAssociations = new HashMap<String, String>();
+        fileTableAssociations.put("routes.txt", BusRoutes.CONTENT_PATH);
+        fileTableAssociations.put("trips.txt", Trips.CONTENT_PATH);
+        fileTableAssociations.put("stops.txt", Stops.CONTENT_PATH);
+        fileTableAssociations.put("stop_times.txt", StopTimes.CONTENT_PATH);
+        fileTableAssociations.put("calendar.txt", Calendar.CONTENT_PATH);
 
+        long fileLength;
         String table;
+        CSVFormat format = CSVFormat.DEFAULT.withFirstRecordAsHeader();
+        CSVParser parser;
         ContentValues values;
 
         for (File f : files[0].listFiles()) {
             // Si le fichier est un fichier utile
             if (fileTableAssociations.containsKey(f.getName())) {
+                fileLength = f.length();
                 table = fileTableAssociations.get(f.getName());
                 publishProgress(0);
 
                 try {
-                    CSVParser parser = new CSVParser(new FileReader(f), CSVFormat.DEFAULT);
-                    progressBar.setMax(parser.getRecords().size());
+                    parser = new CSVParser(new FileReader(f), format);
 
-                    for (CSVRecord record : parser.getRecords()) {
+                    for (CSVRecord record : parser) {
+                        publishProgress((int) (progressBar.getMax() * record.getCharacterPosition() / fileLength));
+
                         values = new ContentValues();
 
                         switch (f.getName()) {
                             case "routes.txt":
-                                values.put(StarContract.BusRoutes.BusRouteColumns._ID, record.get(StarContract.BusRoutes.BusRouteColumns._ID));
-                                values.put(StarContract.BusRoutes.BusRouteColumns.SHORT_NAME, splitedStringValues[2]);
-                                values.put(StarContract.BusRoutes.BusRouteColumns.LONG_NAME, splitedStringValues[3]);
-                                values.put(StarContract.BusRoutes.BusRouteColumns.DESCRIPTION, splitedStringValues[4]);
-                                values.put(StarContract.BusRoutes.BusRouteColumns.TYPE, splitedStringValues[5]);
-                                values.put(StarContract.BusRoutes.BusRouteColumns.COLOR, splitedStringValues[7]);
-                                values.put(StarContract.BusRoutes.BusRouteColumns.TEXT_COLOR, splitedStringValues[8]);
+                                values.put(BusRoutes.BusRouteColumns._ID, record.get(BusRoutes.BusRouteColumns._ID));
+                                values.put(BusRoutes.BusRouteColumns.SHORT_NAME, record.get(BusRoutes.BusRouteColumns.SHORT_NAME));
+                                values.put(BusRoutes.BusRouteColumns.LONG_NAME, record.get(BusRoutes.BusRouteColumns.LONG_NAME));
+                                values.put(BusRoutes.BusRouteColumns.DESCRIPTION, record.get(BusRoutes.BusRouteColumns.DESCRIPTION));
+                                values.put(BusRoutes.BusRouteColumns.TYPE, record.get(BusRoutes.BusRouteColumns.TYPE));
+                                values.put(BusRoutes.BusRouteColumns.COLOR, record.get(BusRoutes.BusRouteColumns.COLOR));
+                                values.put(BusRoutes.BusRouteColumns.TEXT_COLOR, record.get(BusRoutes.BusRouteColumns.TEXT_COLOR));
                                 break;
                             case "trips.txt":
-                                values.put(StarContract.Trips.TripColumns._ID, splitedStringValues[2]);
-                                values.put(StarContract.Trips.TripColumns.ROUTE_ID, splitedStringValues[0]);
-                                values.put(StarContract.Trips.TripColumns.SERVICE_ID, splitedStringValues[1]);
-                                values.put(StarContract.Trips.TripColumns.HEADSIGN, splitedStringValues[3]);
-                                values.put(StarContract.Trips.TripColumns.DIRECTION_ID, splitedStringValues[5]);
-                                values.put(StarContract.Trips.TripColumns.BLOCK_ID, splitedStringValues[6]);
-                                values.put(StarContract.Trips.TripColumns.WHEELCHAIR_ACCESSIBLE, splitedStringValues[8]);
+                                values.put(Trips.TripColumns._ID, record.get(Trips.TripColumns._ID));
+                                values.put(Trips.TripColumns.ROUTE_ID, record.get(Trips.TripColumns.ROUTE_ID));
+                                values.put(Trips.TripColumns.SERVICE_ID, record.get(Trips.TripColumns.SERVICE_ID));
+                                values.put(Trips.TripColumns.HEADSIGN, record.get(Trips.TripColumns.HEADSIGN));
+                                values.put(Trips.TripColumns.DIRECTION_ID, record.get(Trips.TripColumns.DIRECTION_ID));
+                                values.put(Trips.TripColumns.BLOCK_ID, record.get(Trips.TripColumns.BLOCK_ID));
+                                values.put(Trips.TripColumns.WHEELCHAIR_ACCESSIBLE, record.get(Trips.TripColumns.WHEELCHAIR_ACCESSIBLE));
                                 break;
                             case "stops.txt":
-                                values.put(StarContract.Stops.StopColumns._ID, splitedStringValues[0]);
-                                values.put(StarContract.Stops.StopColumns.NAME, splitedStringValues[2]);
-                                values.put(StarContract.Stops.StopColumns.DESCRIPTION, splitedStringValues[3]);
-                                values.put(StarContract.Stops.StopColumns.LATITUDE, Float.valueOf(splitedStringValues[4]));
-                                values.put(StarContract.Stops.StopColumns.LONGITUDE, Float.valueOf(splitedStringValues[5]));
-                                values.put(StarContract.Stops.StopColumns.WHEELCHAIR_BOARDING, splitedStringValues[11]);
+                                values.put(Stops.StopColumns._ID, record.get(Stops.StopColumns._ID));
+                                values.put(Stops.StopColumns.NAME, record.get(Stops.StopColumns.NAME));
+                                values.put(Stops.StopColumns.DESCRIPTION, record.get(Stops.StopColumns.DESCRIPTION));
+                                values.put(Stops.StopColumns.LATITUDE, Float.valueOf(record.get(Stops.StopColumns.LATITUDE)));
+                                values.put(Stops.StopColumns.LONGITUDE, Float.valueOf(record.get(Stops.StopColumns.LONGITUDE)));
+                                values.put(Stops.StopColumns.WHEELCHAIR_BOARDING, record.get(Stops.StopColumns.WHEELCHAIR_BOARDING));
                                 break;
                             case "stop_times.txt":
-                                values.put(StarContract.StopTimes.StopTimeColumns.TRIP_ID, splitedStringValues[0]);
-                                values.put(StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME, splitedStringValues[1]);
-                                values.put(StarContract.StopTimes.StopTimeColumns.DEPARTURE_TIME, splitedStringValues[2]);
-                                values.put(StarContract.StopTimes.StopTimeColumns.STOP_ID, splitedStringValues[3]);
-                                values.put(StarContract.StopTimes.StopTimeColumns.STOP_SEQUENCE, splitedStringValues[4]);
+                                values.put(StopTimes.StopTimeColumns.TRIP_ID, record.get(StopTimes.StopTimeColumns.TRIP_ID));
+                                values.put(StopTimes.StopTimeColumns.ARRIVAL_TIME, record.get(StopTimes.StopTimeColumns.ARRIVAL_TIME));
+                                values.put(StopTimes.StopTimeColumns.DEPARTURE_TIME, record.get(StopTimes.StopTimeColumns.DEPARTURE_TIME));
+                                values.put(StopTimes.StopTimeColumns.STOP_ID, record.get(StopTimes.StopTimeColumns.STOP_ID));
+                                values.put(StopTimes.StopTimeColumns.STOP_SEQUENCE, record.get(StopTimes.StopTimeColumns.STOP_SEQUENCE));
                                 break;
                             case "calendar.txt":
-                                values.put(StarContract.Calendar.CalendarColumns._ID, splitedStringValues[0]);
-                                values.put(StarContract.Calendar.CalendarColumns.MONDAY, splitedStringValues[1]);
-                                values.put(StarContract.Calendar.CalendarColumns.TUESDAY, splitedStringValues[2]);
-                                values.put(StarContract.Calendar.CalendarColumns.WEDNESDAY, splitedStringValues[3]);
-                                values.put(StarContract.Calendar.CalendarColumns.THURSDAY, splitedStringValues[4]);
-                                values.put(StarContract.Calendar.CalendarColumns.FRIDAY, splitedStringValues[5]);
-                                values.put(StarContract.Calendar.CalendarColumns.SATURDAY, splitedStringValues[6]);
-                                values.put(StarContract.Calendar.CalendarColumns.SUNDAY, splitedStringValues[7]);
-                                values.put(StarContract.Calendar.CalendarColumns.START_DATE, splitedStringValues[8]);
-                                values.put(StarContract.Calendar.CalendarColumns.END_DATE, splitedStringValues[9]);
+                                values.put(Calendar.CalendarColumns._ID, record.get(Calendar.CalendarColumns._ID));
+                                values.put(Calendar.CalendarColumns.MONDAY, record.get(Calendar.CalendarColumns.MONDAY));
+                                values.put(Calendar.CalendarColumns.TUESDAY, record.get(Calendar.CalendarColumns.TUESDAY));
+                                values.put(Calendar.CalendarColumns.WEDNESDAY, record.get(Calendar.CalendarColumns.WEDNESDAY));
+                                values.put(Calendar.CalendarColumns.THURSDAY, record.get(Calendar.CalendarColumns.THURSDAY));
+                                values.put(Calendar.CalendarColumns.FRIDAY, record.get(Calendar.CalendarColumns.FRIDAY));
+                                values.put(Calendar.CalendarColumns.SATURDAY, record.get(Calendar.CalendarColumns.SATURDAY));
+                                values.put(Calendar.CalendarColumns.SUNDAY, record.get(Calendar.CalendarColumns.SUNDAY));
+                                values.put(Calendar.CalendarColumns.START_DATE, record.get(Calendar.CalendarColumns.START_DATE));
+                                values.put(Calendar.CalendarColumns.END_DATE, record.get(Calendar.CalendarColumns.END_DATE));
                                 break;
                             default:
                                 break;
                         }
 
                         if (values.size() > 0) {
-                            database.insert(table, null, values);
-                            publishProgress((int) parser.getRecordNumber());
+                            if (database.insert(table, null, values) == -1) {
+                                // Erreur lors de l'insertion,
+                                // on stoppe tout pour éviter de n'avoir que des données partielles dans la base
+                                return false;
+                            }
                         }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
-
-                try {
-                    Scanner sc = new Scanner(f);
-
-                    // Si le fichier n'est pas vide
-                    if (sc.hasNextLine()) {
-                        // La première ligne du fichier correspond aux en-têtes du fichier,
-                        // il faut donc passer cette ligne-là avant de réaliser les insertions
-                        sc.nextLine();
-                        String nextLine;
-
-                        while (sc.hasNextLine()) {
-                            // On récupère la prochaine ligne du fichier
-                            nextLine = sc.nextLine();
-
-                            // Si la ligne n'est pas vide (car chaque fichier contient une ligne vide à la fin)
-                            if (!nextLine.isEmpty()) {
-                                // On supprime le premier et le dernier guillemet de la ligne ...
-                                nextLine = nextLine.substring(1, nextLine.length() - 1);
-                                // ... puis on explose le résultat avec le séparateur ","
-                                String[] splitedStringValues = nextLine.split("\",\"");
-
-                            }
-                        }
-                    }
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
                     return false;
                 }
+
+                System.err.println("table " + table + " terminée");
             }
         }
 

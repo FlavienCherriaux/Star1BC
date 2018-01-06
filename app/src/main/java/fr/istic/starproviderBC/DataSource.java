@@ -17,6 +17,7 @@ public class DataSource {
     // cut -d',' -f5 routes.txt |sort|uniq
     private Activity activity;
     private DatabaseHelper dbHelper;
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.FRANCE);
 
     public DataSource(Activity activity) {
         this.activity = activity;
@@ -28,47 +29,46 @@ public class DataSource {
         new DataInsertion(activity, dbHelper.getWritableDatabase()).execute(dataFolder);
     }
 
+    /**
+     * Détermine si la base de données est à jour
+     * @return true si la base de données est à jour, false sinon
+     */
     public boolean isUpToDate() {
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.FRANCE).format(new Date()); // date d'aujourd'hui au format : aaaa-MM-jj
-        /*
-        On compte le nombre de fichiers téléchargés dont l'intervalle de validité comprend la date actuelle
-        et dont les données ont été insérées dans la base
-        */
-        Cursor c = dbHelper.getReadableDatabase().rawQuery("SELECT COUNT(*) " +
-                "FROM versions " +
-                "WHERE ? BETWEEN validityStart AND validityEnd " +
-                "AND dataInserted = 1", new String[] {today});
-
-        c.moveToFirst();
-        int count = c.getInt(0);
-        c.close();
-        return count > 0;
+        String today = dateFormat.format(new Date()); // date d'aujourd'hui au format : aaaa-MM-jj
+        Cursor c = getCurrentDataInfo();
+        return c != null && c.getInt(c.getColumnIndex("dataInserted")) == 1;
     }
 
-    public String getCurrentDataFileName() {
-        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.FRANCE).format(new Date()); // date d'aujourd'hui au format : aaaa-MM-jj
-        Cursor c = dbHelper.getReadableDatabase().rawQuery("SELECT filename " +
+    public Cursor getCurrentDataInfo() {
+        String today = dateFormat.format(new Date()); // date d'aujourd'hui au format : aaaa-MM-jj
+        Cursor c = dbHelper.getReadableDatabase().rawQuery("SELECT * " +
                 "FROM versions " +
                 "WHERE ? BETWEEN validityStart AND validityEnd", new String[] {today});
 
-        String filename;
-        if (c.moveToFirst()) {
-            filename = c.getString(0);
-        } else {
-            filename = null;
-        }
-
-        c.close();
-        return filename;
+        return c.moveToFirst() ? c : null;
     }
 
     public void addVersion(String filename, Date validityStart, Date validityEnd) {
         ContentValues newValues = new ContentValues();
         newValues.put("filename", filename);
-        newValues.put("validityStart", validityStart.toString());
-        newValues.put("validityEnd", validityEnd.toString());
+        newValues.put("validityStart", dateFormat.format(validityStart));
+        newValues.put("validityEnd", dateFormat.format(validityEnd));
         newValues.put("dataInserted", 0);
         dbHelper.getWritableDatabase().insert("versions", null, newValues);
+    }
+
+    public void removeVersions() {
+        dbHelper.getWritableDatabase().execSQL("DELETE FROM versions");
+    }
+
+    public void printVersions() {
+        Cursor c = dbHelper.getWritableDatabase().rawQuery("SELECT filename, validityStart, validityEnd, dataInserted FROM versions", null);
+        while (c.moveToNext()) {
+            System.out.println(c.getString(0));
+            System.out.println(c.getString(1));
+            System.out.println(c.getString(2));
+            System.out.println(c.getInt(3));
+        }
     }
 
     public void restart() {

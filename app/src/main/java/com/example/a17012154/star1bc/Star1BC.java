@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -16,30 +17,33 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.Serializable;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import fr.istic.starproviderBC.DataDownloader;
 import fr.istic.starproviderBC.DataSource;
 import fr.istic.starproviderBC.FileUnzipper;
 
-public class Star1BC extends AppCompatActivity {
-
+public class Star1BC extends AppCompatActivity implements Serializable {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_star1_bc);
 
         final DataSource ds = new DataSource(this);
+        final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.FRANCE);
 
         // Si l'application n'a pas été lancée depuis une notification
         if (!this.getIntent().getBooleanExtra("notification", false)) {
             // Si la base de données n'est pas à jour
             if (!ds.isUpToDate()) {
-                String currentDataFileName = ds.getCurrentDataFileName();
+                final Cursor currentDataInfo = ds.getCurrentDataInfo();
 
                 // Si le fichier contenant les données actuelles n'a pas encore été téléchargé
-                if (currentDataFileName == null) {
+                if (currentDataInfo == null) {
                     // On récupère le fichier JSON contenant les noms des fichiers à télécharger pour remplir la base de données
                     final String versionsFilename = "versions.txt";
                     downloadFileFromWeb("https://data.explore.star.fr/explore/dataset/tco-busmetro-horaires-gtfs-versions-td/download/?format=json&timezone=Europe/Berlin", versionsFilename, new DataDownloader.DownloadListener() {
@@ -55,7 +59,6 @@ public class Star1BC extends AppCompatActivity {
                                 // On cherche le fichier contenant les informations actuelles
                                 JSONArray toJson = new JSONArray(content);
                                 JSONObject obj = null;
-                                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
                                 Date today = new Date(), validityStart = new Date(), validityEnd = new Date();
 
                                 // Pour chaque fichier ...
@@ -79,13 +82,16 @@ public class Star1BC extends AppCompatActivity {
                                     Bundle extras = new Bundle();
                                     extras.putBoolean("notification", true);
                                     extras.putString("url", (String) obj.get("url"));
-                                    extras.putString("destFilename", destFilename);
-                                    createNotification(extras);
+                                    extras.putString("filename", destFilename);
+                                    extras.putString("fileValidityStart", df.format(validityStart));
+                                    extras.putString("fileValidityEnd", df.format(validityEnd));
 
-                                    ds.addVersion(destFilename, validityStart, validityEnd);
+                                    createNotification(extras);
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
+                            } finally {
+                                ds.close();
                             }
                         }
                     });
@@ -93,8 +99,10 @@ public class Star1BC extends AppCompatActivity {
                     // On se contente de créer une notification sans re-télécharger les données
                     Bundle extras = new Bundle();
                     extras.putBoolean("notification", true);
-                    extras.putString("destFilename", currentDataFileName);
+                    extras.putString("filename", currentDataInfo.getString(currentDataInfo.getColumnIndex("filename")));
                     createNotification(extras);
+
+                    ds.close();
                 }
             }
         } else { // L'application a été lancée depuis la notification permettant la mise à jour de la base de données
@@ -103,15 +111,25 @@ public class Star1BC extends AppCompatActivity {
             DataDownloader.DownloadListener dl = new DataDownloader.DownloadListener() {
                 @Override
                 public void onDownloadCompleted() {
-                    File newZip = new File(Star1BC.this.getFilesDir().getAbsolutePath() + File.separator + extras.getString("destFilename"));
+                    if (extras.containsKey("url")) {
+                        try {
+                            ds.addVersion(extras.getString("filename"), df.parse(extras.getString("fileValidityStart")), df.parse(extras.getString("fileValidityEnd")));
+                        } catch (ParseException e) {
+                            ds.close();
+                            e.printStackTrace();
+                        }
+                    }
+
+                    File newZip = new File(Star1BC.this.getFilesDir().getAbsolutePath() + File.separator + extras.getString("filename"));
                     File destFolder = FileUnzipper.unzip(newZip, new File(newZip.getParent() + File.separator + "data"));
                     ds.insert(destFolder);
+                    //ds.close();
                 }
             };
 
             // Si le fichier n'a pas déjà été téléchargé
             if (extras.containsKey("url")) {
-                downloadFileFromWeb(extras.getString("url"), extras.getString("destFilename"), dl);
+                downloadFileFromWeb(extras.getString("url"), extras.getString("filename"), dl);
             } else { // Sinon, on se contente de dézipper le fichier et d'insérer dans la base de données
                 dl.onDownloadCompleted();
             }

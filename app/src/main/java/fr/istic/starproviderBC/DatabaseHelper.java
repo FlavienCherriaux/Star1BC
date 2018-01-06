@@ -66,17 +66,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Table stoptime
         db.execSQL("CREATE TABLE IF NOT EXISTS " + StopTimes.CONTENT_PATH + " (" +
-                StopTimes.StopTimeColumns._ID + " TEXT NOT NULL," +
                 StopTimes.StopTimeColumns.TRIP_ID + " TEXT, " +
                 StopTimes.StopTimeColumns.ARRIVAL_TIME + " TEXT, " +
                 StopTimes.StopTimeColumns.DEPARTURE_TIME + " TEXT, " +
                 StopTimes.StopTimeColumns.STOP_ID + " TEXT, " +
                 StopTimes.StopTimeColumns.STOP_SEQUENCE + " TEXT, " +
-                "PRIMARY KEY(" + StopTimes.StopTimeColumns._ID + ")" +
+                "PRIMARY KEY(" + StopTimes.StopTimeColumns.TRIP_ID + ", " + StopTimes.StopTimeColumns.STOP_SEQUENCE + ")" +
                 ")");
 
         // Table calendar
-        db.execSQL("CREATE TABLE IF NOT EXISTS " + Calendar.CONTENT_PAT + " (" +
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + Calendar.CONTENT_PATH + " (" +
                 Calendar.CalendarColumns._ID + " TEXT NOT NULL, " +
                 Calendar.CalendarColumns.MONDAY + " TEXT, " +
                 Calendar.CalendarColumns.TUESDAY + " TEXT, " +
@@ -106,7 +105,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE " + Trips.CONTENT_PATH);
         db.execSQL("DROP TABLE " + Stops.CONTENT_PATH);
         db.execSQL("DROP TABLE " + StopTimes.CONTENT_PATH);
-        db.execSQL("DROP TABLE " + Calendar.CONTENT_PAT);
+        db.execSQL("DROP TABLE " + Calendar.CONTENT_PATH);
         onCreate(db);
     }
 }
