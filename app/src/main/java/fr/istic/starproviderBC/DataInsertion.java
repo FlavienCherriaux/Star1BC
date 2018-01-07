@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.a17012154.star1bc.R;
 
@@ -24,11 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import fr.istic.starproviderBC.StarContract.BusRoutes;
-import fr.istic.starproviderBC.StarContract.Calendar;
-import fr.istic.starproviderBC.StarContract.StopTimes;
-import fr.istic.starproviderBC.StarContract.Stops;
-import fr.istic.starproviderBC.StarContract.Trips;
+import fr.istic.starproviderBC.StarContract.*;
 
 /**
  * fr.istic.starproviderBC
@@ -43,13 +40,12 @@ public class DataInsertion extends AsyncTask<File, Integer, Boolean> {
     public DataInsertion(Activity activity, SQLiteDatabase database) {
         this.activity = activity;
         this.database = database;
-        this.progressBar = new ProgressBar(activity, null, android.R.attr.progressBarStyleHorizontal);
     }
 
     @Override
     protected void onPreExecute() {
-        progressBar.setMax(100);
-        progressBar.setVisibility(ProgressBar.VISIBLE);
+        progressBar = (ProgressBar) activity.findViewById(R.id.progress_bar);
+        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -67,12 +63,14 @@ public class DataInsertion extends AsyncTask<File, Integer, Boolean> {
         CSVFormat format = CSVFormat.DEFAULT.withFirstRecordAsHeader();
         CSVParser parser;
         ContentValues values;
+        int fileCount = 0;
 
         for (File f : files[0].listFiles()) {
             // Si le fichier est un fichier utile
             if (fileTableAssociations.containsKey(f.getName())) {
                 fileLength = f.length();
                 table = fileTableAssociations.get(f.getName());
+                fileCount++;
                 publishProgress(0);
 
                 try {
@@ -145,8 +143,6 @@ public class DataInsertion extends AsyncTask<File, Integer, Boolean> {
                     e.printStackTrace();
                     return false;
                 }
-
-                System.err.println("table " + table + " terminée");
             }
         }
 
